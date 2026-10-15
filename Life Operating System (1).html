@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life Operating System | Personal Performance & Analytics</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            900: '#14532d',
+                        },
+                        darkbg: '#0b0f17',
+                        cardbg: '#131b2e',
+                        bordercolor: '#1e293b'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #0b0f17;
+            color: #f1f5f9;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0b0f17;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col custom-scrollbar">
+
+    <header class="border-b border-gray-800 bg-gray-900/80 backdrop-blur sticky top-0 z-40 px-4 py-3">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20">
+                    <i class="fa-solid fa-compass-drafting text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                        LIFE OS <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">v3.5 Active</span>
+                    </h1>
+                    <p class="text-xs text-gray-400" id="live-clock">Loading system time...</p>
+                </div>
+            </div>
+
+            <!-- Quick Action Bar -->
+            <div class="flex items-center gap-3 flex-wrap justify-center">
+                <button onclick="openRingtoneModal()" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-semibold rounded-lg border border-gray-700 flex items-center gap-2 transition">
+                    <i class="fa-solid fa-bell text-amber-400"></i> Reminders & Audio
+                </button>
+                <button onclick="toggleExceptionalMode()" id="exceptional-toggle-btn" class="px-3 py-1.5 bg-purple-900/40 hover:bg-purple-900/60 text-purple-300 text-xs font-semibold rounded-lg border border-purple-700/50 flex items-center gap-2 transition">
+                    <i class="fa-solid fa-heart text-pink-400"></i> Mode: Standard Day
+                </button>
+                <button onclick="openRecapModal()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg flex items-center gap-2 shadow-lg shadow-emerald-900/30 transition">
+                    <i class="fa-solid fa-video"></i> Generate Daily Video Recap
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- LEFT 2 COLUMNS: Timeline & Event Logging -->
+        <section class="lg:col-span-2 space-y-6">
+            
+            <!-- Dynamic Banner for Current & Next Event -->
+            <div class="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 p-5 rounded-2xl border border-gray-800 shadow-xl relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Active Timeline Status
+                        </span>
+                        <h2 class="text-2xl font-black text-white mt-1" id="current-event-title">06:30 - Wake / Hydrate</h2>
+                        <p class="text-xs text-gray-400 mt-0.5" id="current-event-desc">Morning initiation sequence and physiological hydration.</p>
+                    </div>
+                    <div class="text-left md:text-right bg-gray-950/60 p-3 rounded-xl border border-gray-800/80 min-w-[160px]">
+                        <span class="text-[10px] text-gray-400 font-medium uppercase tracking-wider block">Upcoming Reminder</span>
+                        <span class="text-base font-extrabold text-amber-400" id="next-event-countdown">00:00:00</span>
+                        <span class="text-[11px] text-gray-400 block truncate max-w-[150px]" id="next-event-name">Next: Physical Training</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schedule Items Container -->
+            <div class="space-y-4" id="timeline-container">
+                <!-- Event cards rendered via JavaScript -->
+            </div>
+        </section>
+
+        <section class="space-y-6">
+
+            <!-- Day Analytics Summary Card -->
+            <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 shadow-lg space-y-4">
+                <h3 class="text-base font-bold text-white flex items-center justify-between border-b border-gray-800 pb-3">
+                    <span><i class="fa-solid fa-chart-line text-emerald-400 mr-2"></i>Time-Gap & Delay Analytics</span>
+                    <span class="text-xs text-gray-500 font-normal">Real-Time</span>
+                </h3>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-gray-950/80 p-3 rounded-xl border border-gray-800">
+                        <span class="text-[11px] text-gray-400 block">Total Delays</span>
+                        <span class="text-xl font-black text-amber-400" id="stat-total-delay">0 mins</span>
+                    </div>
+                    <div class="bg-gray-950/80 p-3 rounded-xl border border-gray-800">
+                        <span class="text-[11px] text-gray-400 block">Logged Gaps</span>
+                        <span class="text-xl font-black text-blue-400" id="stat-avg-gap">0 mins</span>
+                    </div>
+                    <div class="bg-gray-950/80 p-3 rounded-xl border border-gray-800">
+                        <span class="text-[11px] text-gray-400 block">Deep Work Executed</span>
+                        <span class="text-xl font-black text-emerald-400" id="stat-deep-work">0 / 2 hrs</span>
+                    </div>
+                    <div class="bg-gray-950/80 p-3 rounded-xl border border-gray-800">
+                        <span class="text-[11px] text-gray-400 block">Check-in Rate</span>
+                        <span class="text-xl font-black text-purple-400" id="stat-completion">0%</span>
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <div class="flex justify-between text-xs text-gray-400 mb-1">
+                        <span>Day Adherence Score</span>
+                        <span font-semibold id="adherence-pct">100%</span>
+                    </div>
+                    <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
+                        <div id="adherence-bar" class="bg-emerald-500 h-full transition-all duration-500" style="width: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Intimacy Day Recommendation Engine -->
+            <div class="bg-gray-900 border border-purple-900/40 rounded-2xl p-5 shadow-lg space-y-4 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-pink-500/5 rounded-full blur-2xl pointer-events-none"></div>
+
+                <div class="flex items-center justify-between border-b border-gray-800 pb-3">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-heart-pulse text-pink-500"></i> Intimacy Planner Engine
+                    </h3>
+                    <span class="text-[10px] bg-pink-500/10 text-pink-400 px-2 py-0.5 rounded border border-pink-500/20 font-bold">AI ASSIST</span>
+                </div>
+
+                <!-- Input Factors -->
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-xs text-gray-400 flex justify-between mb-1">
+                            <span>Today Energy Score</span>
+                            <span class="text-pink-400 font-bold" id="energy-val">8/10</span>
+                        </label>
+                        <input type="range" min="1" max="10" value="8" id="energy-slider" oninput="updateIntimacyRecommendation()" class="w-full accent-pink-500 bg-gray-800 h-1.5 rounded-lg appearance-none cursor-pointer">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="bg-gray-950 p-2.5 rounded-lg border border-gray-800">
+                            <span class="text-gray-400 block text-[10px]">Budget Cap</span>
+                            <span class="font-bold text-amber-400">10k - 15k RWF</span>
+                        </div>
+                        <div class="bg-gray-950 p-2.5 rounded-lg border border-gray-800">
+                            <span class="text-gray-400 block text-[10px]">Pre-Dinner Rule</span>
+                            <span class="font-bold text-emerald-400">Finish &lt; 20:30</span>
+                        </div>
+                    </div>
+
+                    <!-- Engine Feasibility Assessment Result -->
+                    <div class="bg-purple-950/30 border border-purple-800/40 p-3.5 rounded-xl space-y-2" id="recommendation-result">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
+                            <span class="text-xs font-bold text-purple-200" id="rec-status">High Feasibility Today</span>
+                        </div>
+                        <p class="text-[11px] text-gray-300 leading-relaxed" id="rec-explanation">
+                            Deep work slots & routine stability are optimal. You have full capacity for an exceptional session without sacrificing dinner or sleep routine.
+                        </p>
+                        <div class="flex gap-2 pt-1">
+                            <button onclick="setExceptionalSession('daytime')" class="flex-1 py-1.5 bg-pink-600/80 hover:bg-pink-600 text-white text-[11px] font-semibold rounded-lg transition text-center">
+                                Plan Daytime (14:00)
+                            </button>
+                            <button onclick="setExceptionalSession('evening')" class="flex-1 py-1.5 bg-purple-600/80 hover:bg-purple-600 text-white text-[11px] font-semibold rounded-lg transition text-center">
+                                Plan Evening (17:30)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image Proof Gallery -->
+            <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 shadow-lg space-y-4">
+                <h3 class="text-base font-bold text-white flex items-center justify-between border-b border-gray-800 pb-3">
+                    <span><i class="fa-solid fa-camera text-blue-400 mr-2"></i>Daily Proof Artifacts</span>
+                    <span class="text-xs text-gray-500 font-normal" id="proof-count">0 images</span>
+                </h3>
+                <div class="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto custom-scrollbar p-1" id="proof-gallery">
+                    <div class="col-span-3 text-center py-6 text-gray-500 text-xs italic">
+                        No photos logged today yet. Click "Upload Proof" on any event.
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Audio & Ringtone Selector Modal -->
+    <div id="ringtone-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-gray-800 pb-3">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-amber-400"></i> Reminder Sound Settings
+                </h3>
+                <button onclick="closeRingtoneModal()" class="text-gray-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="space-y-4 text-sm">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1">Preferred 5-Min Alarm Ringtone</label>
+                    <select id="ringtone-select" onchange="previewRingtone()" class="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-amber-500">
+                        <option value="chime">Digital Synth Chime (Clean & Modern)</option>
+                        <option value="pulse">Focus Pulse Tone (Deep Sub Harmonic)</option>
+                        <option value="zen">Zen Gong (Calm Bell Synthesizer)</option>
+                        <option value="marimba">Warm Synthesizer Arpeggio</option>
+                    </select>
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="testRingtoneSound()" class="flex-1 py-2 bg-gray-800 hover:bg-gray-700 text-amber-400 font-semibold rounded-xl border border-amber-500/30 flex items-center justify-center gap-2 transition text-xs">
+                        <i class="fa-solid fa-play"></i> Test Alarm Sound
+                    </button>
+                </div>
+
+                <div class="p-3 bg-amber-950/20 border border-amber-800/30 rounded-xl text-xs text-amber-300/80 leading-relaxed">
+                    <i class="fa-solid fa-circle-info mr-1"></i> Reminders trigger automatically 5 minutes prior to every scheduled event in your active daily timetable.
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <button onclick="closeRingtoneModal()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition text-xs">
+                    Save Audio Preferences
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Video Recap Compiler Modal -->
+    <div id="recap-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl max-w-2xl w-full p-6 space-y-5 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-gray-800 pb-3">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-film text-emerald-400"></i> Daily Visual Recap Generator
+                </h3>
+                <button onclick="closeRecapModal()" class="text-gray-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="space-y-4 text-center" id="recap-render-area">
+                <p class="text-xs text-gray-400">
+                    Stitches all event proof photos captured today into a custom slideshow with ambient background music synthesis.
+                </p>
+
+                <!-- Hidden Canvas for Recording -->
+                <canvas id="recap-canvas" width="640" height="360" class="mx-auto rounded-xl border border-gray-800 bg-gray-950 max-w-full hidden"></canvas>
+
+                <!-- Preview Video Output -->
+                <video id="recap-video-preview" controls class="w-full max-h-[320px] rounded-xl border border-emerald-500/30 bg-black hidden mx-auto"></video>
+
+                <!-- Status Progress -->
+                <div id="recap-status" class="py-6 text-gray-400 text-sm font-medium">
+                    Ready to compile today's artifacts.
+                </div>
+
+                <div class="flex gap-3 justify-center">
+                    <button onclick="generateDailyRecapVideo()" id="start-recap-btn" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg transition text-xs flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Compile Daily Video (.webm)
+                    </button>
+                    <a id="download-recap-link" class="hidden px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition text-xs flex items-center gap-2">
+                        <i class="fa-solid fa-download"></i> Download Video
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden File Input for Image Proof Uploads -->
+    <input type="file" id="proof-file-input" accept="image/*" class="hidden" onchange="handleProofFileUpload(event)">
+
+    <script>
+        // Master Daily Schedule Definition
+        const MASTER_SCHEDULE = [
+            { id: 'ev1', time: '06:30', title: 'Wake / Hydrate', desc: 'Physiological reset, 500ml water & morning mobility.', type: 'routine', img: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400&q=80' },
+            { id: 'ev2', time: '07:00', title: 'Physical Training', desc: 'High intensity conditioning & strength workout.', type: 'health', img: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&q=80' },
+            { id: 'ev3', time: '08:15', title: 'Clean / Fuel', desc: 'Post-workout hygiene and nutrient dense breakfast.', type: 'routine', img: 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=400&q=80' },
+            { id: 'ev4', time: '09:00', title: 'Deep Work 1: Mushu', desc: 'Uninterrupted high-priority project execution block.', type: 'work', img: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80' },
+            { id: 'ev5', time: '13:00', title: 'Lunch / Mind Reset', desc: 'Nutritional replenishment and mental decompression.', type: 'routine', img: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80' },
+            { id: 'ev6', time: '14:00', title: 'Driving Practice', desc: 'Practical behind-the-wheel skill acquisition.', type: 'skill', img: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=400&q=80' },
+            { id: 'ev7', time: '15:30', title: 'Deep Work 2 / Monetization', desc: 'Business growth, commercial projects & revenue tasks.', type: 'work', img: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&q=80' },
+            { id: 'ev8', time: '17:30', title: 'Personal / Inner Circle / 3ean', desc: 'Relationships, community, personal connection time.', type: 'social', img: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400&q=80' },
+            { id: 'ev9', time: '20:30', title: 'Family Dinner', desc: 'Evening meal with family, strict finish before wind-down.', type: 'social', img: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&q=80' },
+            { id: 'ev10', time: '21:30', title: 'Wind-Down & Disconnect', desc: 'Zero blue light, journal review, prepare for sleep.', type: 'routine', img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&q=80' },
+            { id: 'ev11', time: '22:30', title: 'Quality Sleep Window', desc: 'Optimal circadian restorative sleep cycle.', type: 'health', img: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=400&q=80' }
+        ];
+
+        // System State
+        let activeSchedule = JSON.parse(JSON.stringify(MASTER_SCHEDULE));
+        let eventLogs = {}; // Stores { startTime, finishTime, proofImg } per event ID
+        let currentMode = 'standard'; // 'standard', 'exceptional-daytime', 'exceptional-evening'
+        let selectedRingtone = 'chime';
+        let activeTargetUploadId = null;
+        let audioCtx = null;
+        let verifiedReminders = {};
+
+        function saveState() {
+            const data = {
+                eventLogs,
+                currentMode,
+                selectedRingtone,
+                date: new Date().toDateString()
+            };
+            localStorage.setItem('LIFE_OS_DATA', JSON.stringify(data));
+        }
+
+        function loadState() {
+            const saved = localStorage.getItem('LIFE_OS_DATA');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    // Reset if it's a new day
+                    if (parsed.date === new Date().toDateString()) {
+                        eventLogs = parsed.eventLogs || {};
+                        currentMode = parsed.currentMode || 'standard';
+                        selectedRingtone = parsed.selectedRingtone || 'chime';
+                        if (currentMode !== 'standard') {
+                            applyExceptionalMode(currentMode, false);
+                        }
+                    }
+                } catch (e) {
+                    console.error("Failed loading state", e);
+                }
+            }
+        }
+
+        function initAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playAudioTone(type) {
+            initAudioContext();
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'chime') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.4); // C6
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+                osc.start(now);
+                osc.stop(now + 0.8);
+            } else if (type === 'pulse') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.setValueAtTime(440, now + 0.15);
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+                osc.start(now);
+                osc.stop(now + 0.5);
+            } else if (type === 'zen') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(432, now);
+                gain.gain.setValueAtTime(0.5, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 2.0);
+                osc.start(now);
+                osc.stop(now + 2.0);
+            } else if (type === 'marimba') {
+                osc.type = 'sine';
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    const subOsc = audioCtx.createOscillator();
+                    const subGain = audioCtx.createGain();
+                    subOsc.connect(subGain);
+                    subGain.connect(audioCtx.destination);
+                    subOsc.frequency.setValueAtTime(freq, now + (idx * 0.1));
+                    subGain.gain.setValueAtTime(0.2, now + (idx * 0.1));
+                    subGain.gain.exponentialRampToValueAtTime(0.001, now + (idx * 0.1) + 0.3);
+                    subOsc.start(now + (idx * 0.1));
+                    subOsc.stop(now + (idx * 0.1) + 0.3);
+                });
+            }
+        }
+
+        function renderTimeline() {
+            const container = document.getElementById('timeline-container');
+            container.innerHTML = '';
+
+            activeSchedule.forEach((item, index) => {
+                const log = eventLogs[item.id] || {};
+                const isLoggedStart = !!log.startTime;
+                const isLoggedFinish = !!log.finishTime;
+
+                // Calculate Variance & Time Gaps
+                let gapMarkup = '';
+                if (index > 0) {
+                    const prevItem = activeSchedule[index - 1];
+                    const prevLog = eventLogs[prevItem.id] || {};
+                    if (prevLog.finishTime && log.startTime) {
+                        const gapMinutes = Math.round((new Date(log.startTime) - new Date(prevLog.finishTime)) / 60000);
+                        const gapClass = gapMinutes > 15 ? 'text-amber-400 bg-amber-950/40 border-amber-800/40' : 'text-gray-400 bg-gray-950/50 border-gray-800/50';
+                        gapMarkup = `<div class="text-[10px] ${gapClass} border px-2 py-0.5 rounded-full inline-flex items-center gap-1 mb-2">
+                            <i class="fa-solid fa-hourglass-half"></i> Transition Gap: ${gapMinutes} min
+                        </div>`;
+                    }
+                }
+
+                // Header Photo/Illustration Banner
+                const photoHtml = log.proofImg 
+                    ? `<img src="${log.proofImg}" class="w-full h-28 object-cover rounded-xl border border-emerald-500/30 mb-3" />`
+                    : `<div class="relative w-full h-24 rounded-xl overflow-hidden mb-3 border border-gray-800">
+                        <img src="${item.img}" class="w-full h-full object-cover opacity-40 hover:opacity-60 transition" />
+                        <span class="absolute bottom-2 left-2 text-[10px] bg-black/60 backdrop-blur px-2 py-0.5 rounded text-gray-300 font-mono">${item.type.toUpperCase()} MODULE</span>
+                       </div>`;
+
+                const cardHtml = `
+                    <div class="bg-gray-900 border ${isLoggedFinish ? 'border-emerald-800/40 bg-emerald-950/10' : 'border-gray-800'} rounded-2xl p-4 shadow-md transition hover:border-gray-700">
+                        ${gapMarkup}
+                        ${photoHtml}
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-mono font-bold px-2 py-0.5 bg-gray-800 text-emerald-400 rounded-lg">${item.time}</span>
+                                    <h4 class="text-base font-bold text-white">${item.title}</h4>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-1">${item.desc}</p>
+                                
+                                <!-- Timestamps Logged -->
+                                <div class="flex flex-wrap gap-3 mt-2 text-[11px]">
+                                    <span class="text-gray-400">
+                                        <i class="fa-solid fa-play text-emerald-400 mr-1"></i> Start: 
+                                        <strong class="text-white">${log.startTime ? new Date(log.startTime).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '--:--'}</strong>
+                                    </span>
+                                    <span class="text-gray-400">
+                                        <i class="fa-solid fa-flag-checkered text-blue-400 mr-1"></i> Finish: 
+                                        <strong class="text-white">${log.finishTime ? new Date(log.finishTime).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '--:--'}</strong>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="flex flex-wrap md:flex-col gap-2 min-w-[130px]">
+                                <button onclick="logEventStart('${item.id}')" ${isLoggedStart ? 'disabled' : ''} class="flex-1 px-3 py-1.5 ${isLoggedStart ? 'bg-gray-800 text-gray-500 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-500 text-white'} rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+                                    <i class="fa-solid fa-right-to-bracket"></i> ${isLoggedStart ? 'Logged In' : 'Log Start'}
+                                </button>
+                                <button onclick="logEventFinish('${item.id}')" ${!isLoggedStart || isLoggedFinish ? 'disabled' : ''} class="flex-1 px-3 py-1.5 ${!isLoggedStart || isLoggedFinish ? 'bg-gray-800 text-gray-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500 text-white'} rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+                                    <i class="fa-solid fa-right-from-bracket"></i> ${isLoggedFinish ? 'Completed' : 'Log Finish'}
+                                </button>
+                                <button onclick="triggerProofUpload('${item.id}')" class="flex-1 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 border border-gray-700 transition">
+                                    <i class="fa-solid fa-camera text-amber-400"></i> ${log.proofImg ? 'Update Proof' : 'Upload Proof'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', cardHtml);
+            });
+
+            updateAnalytics();
+            updateProofGallery();
+        }
+
+        function logEventStart(id) {
+            initAudioContext();
+            if (!eventLogs[id]) eventLogs[id] = {};
+            eventLogs[id].startTime = new Date().toISOString();
+            saveState();
+            renderTimeline();
+        }
+
+        function logEventFinish(id) {
+            initAudioContext();
+            if (!eventLogs[id]) eventLogs[id] = {};
+            eventLogs[id].finishTime = new Date().toISOString();
+            saveState();
+            renderTimeline();
+        }
+
+        function toggleExceptionalMode() {
+            if (currentMode === 'standard') {
+                setExceptionalSession('daytime');
+            } else {
+                currentMode = 'standard';
+                activeSchedule = JSON.parse(JSON.stringify(MASTER_SCHEDULE));
+                document.getElementById('exceptional-toggle-btn').innerHTML = `<i class="fa-solid fa-heart text-pink-400"></i> Mode: Standard Day`;
+                saveState();
+                renderTimeline();
+            }
+        }
+
+        function setExceptionalSession(sessionType) {
+            applyExceptionalMode(sessionType, true);
+        }
+
+        function applyExceptionalMode(sessionType, shouldSave = true) {
+            activeSchedule = JSON.parse(JSON.stringify(MASTER_SCHEDULE));
+            if (sessionType === 'daytime') {
+                currentMode = 'exceptional-daytime';
+                // Replace Driving (14:00) & Deep Work 2 (15:30) with Daytime Intimacy Session (14:00 - 17:30)
+                activeSchedule = activeSchedule.filter(item => item.id !== 'ev6' && item.id !== 'ev7');
+                activeSchedule.splice(5, 0, {
+                    id: 'ev_intimacy_day',
+                    time: '14:00',
+                    title: 'Daytime Intimacy Session',
+                    desc: 'Exceptional Module (14:00-17:30). Budget Cap: 10k-15k RWF max. Finish before evening routine.',
+                    type: 'intimacy',
+                    img: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=400&q=80'
+                });
+                document.getElementById('exceptional-toggle-btn').innerHTML = `<i class="fa-solid fa-heart text-pink-500"></i> Daytime Intimacy Active`;
+            } else if (sessionType === 'evening') {
+                currentMode = 'exceptional-evening';
+                // Replace Personal/Inner Circle (17:30) with Evening Intimacy Session (17:30 - 20:30)
+                const index = activeSchedule.findIndex(item => item.id === 'ev8');
+                if (index !== -1) {
+                    activeSchedule[index] = {
+                        id: 'ev_intimacy_eve',
+                        time: '17:30',
+                        title: 'Evening Intimacy Session',
+                        desc: 'Exceptional Module (17:30-20:30). Budget Cap: 10k-15k RWF. Strictly finishes before Family Dinner.',
+                        type: 'intimacy',
+                        img: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=400&q=80'
+                    };
+                }
+                document.getElementById('exceptional-toggle-btn').innerHTML = `<i class="fa-solid fa-heart text-purple-400"></i> Evening Intimacy Active`;
+            }
+            if (shouldSave) {
+                saveState();
+                renderTimeline();
+            }
+        }
+
+        function triggerProofUpload(id) {
+            activeTargetUploadId = id;
+            document.getElementById('proof-file-input').click();
+        }
+
+        function handleProofFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file || !activeTargetUploadId) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (!eventLogs[activeTargetUploadId]) eventLogs[activeTargetUploadId] = {};
+                eventLogs[activeTargetUploadId].proofImg = e.target.result;
+                saveState();
+                renderTimeline();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function updateProofGallery() {
+            const gallery = document.getElementById('proof-gallery');
+            const proofCount = document.getElementById('proof-count');
+            gallery.innerHTML = '';
+
+            const images = [];
+            Object.keys(eventLogs).forEach(id => {
+                if (eventLogs[id].proofImg) {
+                    images.push({ id, img: eventLogs[id].proofImg });
+                }
+            });
+
+            proofCount.textContent = `${images.length} logged`;
+
+            if (images.length === 0) {
+                gallery.innerHTML = `<div class="col-span-3 text-center py-6 text-gray-500 text-xs italic">No photos logged today yet. Click "Upload Proof" on any event.</div>`;
+                return;
+            }
+
+            images.forEach(item => {
+                const imgHtml = `<div class="aspect-square rounded-xl overflow-hidden border border-gray-800 bg-gray-950 relative group">
+                    <img src="${item.img}" class="w-full h-full object-cover" />
+                </div>`;
+                gallery.insertAdjacentHTML('beforeend', imgHtml);
+            });
+        }
+
+        function updateAnalytics() {
+            let totalDelaysMin = 0;
+            let gapSums = 0;
+            let gapCount = 0;
+            let completedCount = 0;
+            let deepWorkHours = 0;
+
+            activeSchedule.forEach((item, index) => {
+                const log = eventLogs[item.id] || {};
+                
+                // Track completion
+                if (log.finishTime) completedCount++;
+
+                // Track deep work
+                if (log.finishTime && (item.id === 'ev4' || item.id === 'ev7')) {
+                    deepWorkHours += (item.id === 'ev4' ? 4 : 2); // approximate scheduled slots
+                }
+
+                // Delay relative to scheduled start time
+                if (log.startTime) {
+                    const [schedH, schedM] = item.time.split(':').map(Number);
+                    const schedDate = new Date();
+                    schedDate.setHours(schedH, schedM, 0, 0);
+
+                    const actualStart = new Date(log.startTime);
+                    const diffMin = Math.round((actualStart - schedDate) / 60000);
+                    if (diffMin > 0) totalDelaysMin += diffMin;
+                }
+
+                // Gaps between events
+                if (index > 0) {
+                    const prevLog = eventLogs[activeSchedule[index - 1].id] || {};
+                    if (prevLog.finishTime && log.startTime) {
+                        const gap = Math.round((new Date(log.startTime) - new Date(prevLog.finishTime)) / 60000);
+                        if (gap >= 0) {
+                            gapSums += gap;
+                            gapCount++;
+                        }
+                    }
+                }
+            });
+
+            const avgGap = gapCount > 0 ? Math.round(gapSums / gapCount) : 0;
+            const completionPct = Math.round((completedCount / activeSchedule.length) * 100);
+
+            document.getElementById('stat-total-delay').textContent = `${totalDelaysMin} mins`;
+            document.getElementById('stat-avg-gap').textContent = `${avgGap} mins`;
+            document.getElementById('stat-deep-work').textContent = `${deepWorkHours} hrs`;
+            document.getElementById('stat-completion').textContent = `${completionPct}%`;
+
+            const adherenceScore = Math.max(0, 100 - (totalDelaysMin * 2));
+            document.getElementById('adherence-pct').textContent = `${adherenceScore}%`;
+            document.getElementById('adherence-bar').style.width = `${adherenceScore}%`;
+        }
+
+        function updateIntimacyRecommendation() {
+            const energy = parseInt(document.getElementById('energy-slider').value);
+            document.getElementById('energy-val').textContent = `${energy}/10`;
+
+            const recStatus = document.getElementById('rec-status');
+            const recExplanation = document.getElementById('rec-explanation');
+
+            if (energy >= 7) {
+                recStatus.textContent = 'High Feasibility Today';
+                recStatus.className = 'text-xs font-bold text-emerald-400';
+                recExplanation.textContent = 'Energy levels and schedule stability are optimal. Excellent window for intimacy without interfering with dinner or bedtime.';
+            } else if (energy >= 4) {
+                recStatus.textContent = 'Moderate Feasibility';
+                recStatus.className = 'text-xs font-bold text-amber-400';
+                recExplanation.textContent = 'Moderate physical energy. Prefer the Daytime 14:00 window to keep the evening relaxed and prevent sleep disruption.';
+            } else {
+                recStatus.textContent = 'Low Feasibility (Rest Recommended)';
+                recStatus.className = 'text-xs font-bold text-pink-400';
+                recExplanation.textContent = 'Energy reserve is low today. High risk of burnout if deep work and workout modules are also heavy. Suggest standard recovery night.';
+            }
+        }
+
+        function updateLiveClockAndReminders() {
+            const now = new Date();
+            document.getElementById('live-clock').textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' }) + ' | ' + now.toLocaleTimeString();
+
+            // Find Next Scheduled Event
+            let nextEvent = null;
+            let minDiff = Infinity;
+
+            activeSchedule.forEach(item => {
+                const [h, m] = item.time.split(':').map(Number);
+                const eventTime = new Date();
+                eventTime.setHours(h, m, 0, 0);
+
+                const diffMs = eventTime - now;
+                const diffMin = diffMs / 60000;
+
+                // Pre-event reminder trigger (5 minutes prior)
+                if (diffMin > 0 && diffMin <= 5 && !verifiedReminders[item.id]) {
+                    verifiedReminders[item.id] = true;
+                    playAudioTone(selectedRingtone);
+                }
+
+                if (diffMs > 0 && diffMs < minDiff) {
+                    minDiff = diffMs;
+                    nextEvent = item;
+                }
+            });
+
+            if (nextEvent) {
+                const totalSec = Math.floor(minDiff / 1000);
+                const hrs = String(Math.floor(totalSec / 3600)).padStart(2, '0');
+                const mins = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
+                const secs = String(totalSec % 60).padStart(2, '0');
+
+                document.getElementById('next-event-countdown').textContent = `${hrs}:${mins}:${secs}`;
+                document.getElementById('next-event-name').textContent = `Next: ${nextEvent.title}`;
+            } else {
+                document.getElementById('next-event-countdown').textContent = "Day Complete";
+                document.getElementById('next-event-name').textContent = "No pending events";
+            }
+        }
+
+        function openRingtoneModal() {
+            document.getElementById('ringtone-modal').classList.remove('hidden');
+        }
+
+        function closeRingtoneModal() {
+            document.getElementById('ringtone-modal').classList.add('hidden');
+        }
+
+        function previewRingtone() {
+            selectedRingtone = document.getElementById('ringtone-select').value;
+            saveState();
+        }
+
+        function testRingtoneSound() {
+            selectedRingtone = document.getElementById('ringtone-select').value;
+            playAudioTone(selectedRingtone);
+        }
+
+        function openRecapModal() {
+            document.getElementById('recap-modal').classList.remove('hidden');
+        }
+
+        function closeRecapModal() {
+            document.getElementById('recap-modal').classList.add('hidden');
+        }
+
+        async function generateDailyRecapVideo() {
+            initAudioContext();
+            const statusEl = document.getElementById('recap-status');
+            const canvas = document.getElementById('recap-canvas');
+            const videoPreview = document.getElementById('recap-video-preview');
+            const downloadLink = document.getElementById('download-recap-link');
+            const ctx = canvas.getContext('2d');
+
+            const imagesToRender = [];
+            Object.keys(eventLogs).forEach(id => {
+                if (eventLogs[id].proofImg) {
+                    const match = activeSchedule.find(s => s.id === id);
+                    imagesToRender.push({
+                        title: match ? match.title : 'Logged Event',
+                        src: eventLogs[id].proofImg
+                    });
+                }
+            });
+
+            if (imagesToRender.length === 0) {
+                statusEl.textContent = 'Error: Please upload proof photos to at least one event before compiling video.';
+                return;
+            }
+
+            canvas.classList.remove('hidden');
+            videoPreview.classList.add('hidden');
+            downloadLink.classList.add('hidden');
+            statusEl.textContent = 'Compiling slide deck and synthesizing audio track...';
+
+            // Setup Web Audio Ambient Background Track Stream
+            const dest = audioCtx.createMediaStreamDestination();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            osc.connect(gain);
+            gain.connect(dest);
+            osc.start();
+
+            // Combine Canvas Video Stream & Audio Stream
+            const canvasStream = canvas.captureStream(30);
+            const combinedStream = new MediaStream([
+                ...canvasStream.getVideoTracks(),
+                ...dest.stream.getAudioTracks()
+            ]);
+
+            const recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm' });
+            const chunks = [];
+            recorder.ondataavailable = e => chunks.push(e.data);
+            recorder.onstop = () => {
+                osc.stop();
+                const blob = new Blob(chunks, { type: 'video/webm' });
+                const videoUrl = URL.createObjectURL(blob);
+                videoPreview.src = videoUrl;
+                videoPreview.classList.remove('hidden');
+                canvas.classList.add('hidden');
+
+                downloadLink.href = videoUrl;
+                downloadLink.download = `Daily_Recap_${new Date().toISOString().slice(0,10)}.webm`;
+                downloadLink.classList.remove('hidden');
+                statusEl.textContent = 'Video compilation finished successfully!';
+            };
+
+            recorder.start();
+
+            // Load all Images
+            const loadedImages = await Promise.all(imagesToRender.map(item => {
+                return new Promise(resolve => {
+                    const img = new Image();
+                    img.onload = () => resolve({ img, title: item.title });
+                    img.src = item.src;
+                });
+            }));
+
+            // Render Slideshow Frames
+            let slideIndex = 0;
+            const slideDuration = 2000; // 2 seconds per frame
+            const interval = setInterval(() => {
+                if (slideIndex >= loadedImages.length) {
+                    clearInterval(interval);
+                    recorder.stop();
+                    return;
+                }
+
+                const current = loadedImages[slideIndex];
+                ctx.fillStyle = '#0b0f17';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Draw Image Centered
+                ctx.drawImage(current.img, 120, 30, 400, 250);
+
+                // Draw Overlay Card
+                ctx.fillStyle = 'rgba(19, 27, 46, 0.85)';
+                ctx.fillRect(0, 280, canvas.width, 80);
+
+                ctx.fillStyle = '#22c55e';
+                ctx.font = 'bold 18px sans-serif';
+                ctx.fillText('DAILY OPERATING SYSTEM PROOF', 20, 310);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '14px sans-serif';
+                ctx.fillText(`Event: ${current.title}`, 20, 335);
+
+                slideIndex++;
+            }, slideDuration);
+        }
+
+        window.onload = function() {
+            loadState();
+            renderTimeline();
+            updateIntimacyRecommendation();
+            setInterval(updateLiveClockAndReminders, 1000);
+        };
+    </script>
+</body>
+</html>
