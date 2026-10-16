@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.ico" sizes="48x48">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+    <meta name="theme-color" content="#090D14">
     <title>Life Operating System | Personal Performance & Analytics</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -66,6 +71,9 @@
 
             <!-- Quick Action Bar -->
             <div class="flex items-center gap-3 flex-wrap justify-center">
+                <button onclick="logoutLifeOS()" id="logout-btn" class="px-3 py-1.5 bg-gray-800 hover:bg-red-900/40 text-gray-300 hover:text-red-300 text-xs font-semibold rounded-lg border border-gray-700 hover:border-red-700/50 flex items-center gap-2 transition">
+                    <i class="fa-solid fa-lock"></i> Lock
+                </button>
                 <button onclick="openRingtoneModal()" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-semibold rounded-lg border border-gray-700 flex items-center gap-2 transition">
                     <i class="fa-solid fa-bell text-amber-400"></i> Reminders & Audio
                 </button>
@@ -863,6 +871,12 @@
             updateIntimacyRecommendation();
             setInterval(updateLiveClockAndReminders, 1000);
         };
+    </script>
+<script>
+        async function logoutLifeOS() {
+            try { await fetch('/api/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }); } catch (e) {}
+            window.location.replace('/login.html');
+        }
     </script>
 </body>
 </html>

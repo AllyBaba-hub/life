@@ -1,0 +1,8 @@
+{
+  "name": "life-os",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": {
+    "@vercel/edge": "^1.2.1"
+  }
+}
